@@ -1,0 +1,38 @@
+@import url("https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css");
+
+body { max-width: 900px; margin: 2rem auto; padding: 1.5rem; background: #fff; font-family: system-ui, sans-serif; }
+html { background: #f5f6fa; }
+
+/* plain elements get Bootstrap-looking styles, so no class edits needed */
+table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+th, td { padding: .6rem; border-bottom: 1px solid #dee2e6; text-align: left; }
+tbody tr:nth-child(odd) { background: #f8f9fa; }
+
+label { display: block; font-weight: 500; }
+input, select { width: 100%; padding: .4rem .6rem; margin: .25rem 0 .75rem; border: 1px solid #ced4da; border-radius: .375rem; }
+button { padding: .4rem 1rem; border: 0; border-radius: .375rem; background: #0d6efd; color: #fff; cursor: pointer; }
+button:hover { background: #0b5ed7; }
+
+td a { margin-right: .5rem; }
+
+h2 { margin-bottom: 1rem; padding-bottom: .75rem; border-bottom: 2px solid #0d6efd; }
+
+p:has(> strong:first-child):not(:has(+ form)) {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin: 0;
+  padding: .75rem 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+p:has(> strong:first-child):not(:has(+ form)):nth-of-type(odd) { background: #f8f9fa; }
+
+p:has(> strong:first-child):not(:has(+ form)) strong {
+  flex: 0 0 160px;
+  color: #6c757d;
+  font-size: .8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}

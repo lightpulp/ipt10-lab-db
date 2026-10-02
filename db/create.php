@@ -17,14 +17,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $enrolment_date = trim($_POST['enrolment_date'] ?? '');
 
     // TODO(10)
-    if (empty($first_name) || mb_strlen($first_name) < 2 || mb_strlen($first_name) > 100
-        || !preg_match('/^[\p{L} ]+$/u', $first_name)) {
-        $errors['first_name'] = 'First name is required (2-100 letters and spaces only).';
+    if (strlen($first_name) < 2 || strlen($first_name) > 100 || !preg_match('/^[A-Za-z\s]+$/', $first_name)) {
+        $errors['first_name'] = 'Required, 2-100 characters, letters and spaces only.';
     }
-    if (empty($last_name) || mb_strlen($last_name) < 2 || mb_strlen($last_name) > 100
-        || !preg_match('/^[\p{L} ]+$/u', $last_name)) {
-        $errors['last_name'] = 'Last name is required (2-100 letters and spaces only).';
+    if (strlen($last_name) < 2 || strlen($last_name) > 100 || !preg_match('/^[A-Za-z\s]+$/', $last_name)) {
+        $errors['last_name'] = 'Required, 2-100 characters, letters and spaces only.';
     }
+
 
     // TODO(11)
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -41,8 +40,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Remaining required columns
-    if ($student_number === '') { $errors['student_number'] = 'Student number is required.'; }
-    if ($program === '')        { $errors['program'] = 'Program is required.'; }
+    if ($student_number !== '' && (strlen($student_number) > 50 || !preg_match('/^[A-Za-z0-9]+$/', $student_number))) {
+        $errors['student_number'] = 'Letters and numbers only, max 50 characters.';
+    }
+
+
+    if (strlen($program) > 200) {
+        $errors['program'] = 'Max 200 characters.';
+    }
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $enrolment_date)) {
         $errors['enrolment_date'] = 'Enter a valid date in YYYY-MM-DD format.';
     }
@@ -83,6 +88,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+
+
 <h2>Add New Student</h2>
 <form method="POST">
   <p><label>First name <input name="first_name" value="<?= htmlspecialchars($first_name) ?>"></label>

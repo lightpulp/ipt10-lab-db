@@ -22,6 +22,13 @@ if (!$row) {
 } else {
     $fullName = trim($row['first_name'] . ' ' . ($row['middle_name'] ?? '') . ' ' . $row['last_name']);
 ?>
+
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+
+
+
 <h2>Student Details</h2>
     <p><strong>Student ID:</strong> <?= htmlspecialchars($row['id']) ?></p>
     <p><strong>Full Name:</strong> <?= htmlspecialchars($fullName) ?></p>

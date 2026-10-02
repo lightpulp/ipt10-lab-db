@@ -1,5 +1,5 @@
 <?php
-require_once 'db_connect.php';
+require_once 'config.php';
 
 $errors = [];
 $first_name = $middle_name = $last_name = $email = $birthday = $sex = '';
@@ -48,41 +48,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        $mid = $middle_name === '' ? null : $middle_name;   // middle_name may be NULL
+    $mid = $middle_name === '' ? null : $middle_name;   // middle_name may be NULL
 
-        // TODO(13): 9 placeholders (id uses UUID())
-        $stmt = $conn->prepare(
-            'INSERT INTO students
-             (id, first_name, middle_name, last_name, birthday, sex,
-              email, student_number, program, enrolment_date)
-             VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-        );
+    $sql = 'INSERT INTO students
+            (id, first_name, middle_name, last_name, birthday, sex, email,
+             student_number, program, enrolment_date)
+            VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
-        // TODO(14): nine strings -> 'sssssssss'
-        $stmt->bind_param('sssssssss',
-            $first_name, $mid, $last_name, $birthday, $sex,
-            $email, $student_number, $program, $enrolment_date);
+    // Same order as the placeholders (nine values; id uses UUID())
+    $data = [$first_name, $mid, $last_name, $birthday, $sex,
+             $email, $student_number, $program, $enrolment_date];
 
-        try {
-            $stmt->execute();
-            // No insert_id with a UUID key: check affected_rows instead.
-            if ($stmt->affected_rows === 1) {
-                echo '<p>Student created successfully!</p>';
-                $first_name = $middle_name = $last_name = $email = $birthday = $sex = '';
-                $student_number = $program = $enrolment_date = '';
-            }
-        } catch (mysqli_sql_exception $e) {
-            if ($e->getCode() === 1062) {   // duplicate email or student number
-                $errors['email'] = 'Email or student number already exists.';
-            } else {
-                error_log($e->getMessage());
-                echo '<p>Could not save the student.</p>';
-            }
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($data);
+
+        if ($stmt->rowCount() === 1) {
+            $pdo->commit();   // required: autocommit is off in config.php
+            echo '<p>Student created successfully!</p>';
+            $first_name = $middle_name = $last_name = $email = $birthday = $sex = '';
+            $student_number = $program = $enrolment_date = '';
         }
-        $stmt->close();
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        if (($e->errorInfo[1] ?? 0) === 1062) {   // duplicate email or student number
+            $errors['email'] = 'Email or student number already exists.';
+        } else {
+            error_log($e->getMessage());
+            echo '<p>Could not save the student.</p>';
+        }
     }
 }
+}
 ?>
+
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+
 <h2>Add New Student</h2>
 <form method="POST">
   <p><label>First name <input name="first_name" value="<?= htmlspecialchars($first_name) ?>"></label>
@@ -109,4 +112,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
      <?= isset($errors['enrolment_date']) ? htmlspecialchars($errors['enrolment_date']) : '' ?></p>
   <button type="submit">Save</button> <a href="index.php">Cancel</a>
 </form>
-<?php $conn->close(); ?>
+
+<?php $pdo = null; ?>

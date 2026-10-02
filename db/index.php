@@ -6,6 +6,13 @@ $sql = 'SELECT id, first_name, last_name, email, enrolment_date
         ORDER BY enrolment_date DESC, id ASC';
 $result = mysqli_query($conn, $sql);
 ?>
+
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+
+
+
 <h2>All Student Records</h2>
 <table>
 
@@ -37,6 +44,9 @@ $result = mysqli_query($conn, $sql);
         <?php endwhile; ?>
     </tbody>
 </table>
+
+  <a href="create.php" class="btn btn-success">+ Add Student</a>
+</div>
 <?php
 mysqli_free_result($result);
 mysqli_close($conn);

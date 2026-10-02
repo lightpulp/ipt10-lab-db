@@ -14,16 +14,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($fields as $f) { $v[$f] = trim($_POST[$f] ?? ''); }
 
     foreach (['first_name', 'last_name'] as $f) {
-        if (empty($v[$f]) || mb_strlen($v[$f]) < 2 || mb_strlen($v[$f]) > 100
-            || !preg_match('/^[\p{L} ]+$/u', $v[$f])) {
-            $errors[$f] = 'Required, 2-100 letters and spaces only.';
+        if (strlen($v[$f]) < 2 || strlen($v[$f]) > 100 || !preg_match('/^[A-Za-z\s]+$/', $v[$f])) {
+            $errors[$f] = 'Required, 2-100 characters, letters and spaces only.';
         }
     }
     if (!filter_var($v['email'], FILTER_VALIDATE_EMAIL)) { $errors['email'] = 'Enter a valid email address.'; }
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $v['birthday'])) { $errors['birthday'] = 'Use YYYY-MM-DD.'; }
     if (!in_array($v['sex'], ['Male', 'Female'], true)) { $errors['sex'] = 'Select Male or Female.'; }
-    if ($v['student_number'] === '') { $errors['student_number'] = 'Required.'; }
-    if ($v['program'] === '') { $errors['program'] = 'Required.'; }
+    if ($v['student_number'] !== '' && (strlen($v['student_number']) > 50 || !preg_match('/^[A-Za-z0-9]+$/', $v['student_number']))) {
+        $errors['student_number'] = 'Letters and numbers only, max 50 characters.';
+    }
+    if (strlen($v['program']) > 200) { $errors['program'] = 'Max 200 characters.'; }
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $v['enrolment_date'])) { $errors['enrolment_date'] = 'Use YYYY-MM-DD.'; }
 
     if (empty($errors)) {
@@ -70,7 +71,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$row) { echo '<p>Student not found.</p>'; $conn->close(); exit; }
     foreach ($fields as $f) { $v[$f] = (string)($row[$f] ?? ''); }
 }
+
 ?>
+
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+
+
 <h2>Edit Student</h2>
 <form method="POST">
   <p><label>First name

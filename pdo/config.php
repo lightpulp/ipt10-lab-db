@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 try {
     $pdo = new PDO(
-        'mysql:host=127.0.0.1;dbname=ip10_lab;charset=utf8mb4',
+        'mysql:host=127.0.0.1;
+            dbname=ip10_lab;
+            charset=utf8mb4',
         'root',
         '',
         [
@@ -11,7 +13,6 @@ try {
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES   => false,
             PDO::ATTR_STRINGIFY_FETCHES  => false,
-            // TODO(22): turn off autocommit for manual transaction control
             PDO::ATTR_AUTOCOMMIT         => false,
         ]
     );
