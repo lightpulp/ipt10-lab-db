@@ -1,14 +1,16 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
 <?php
 require_once 'config.php';
 
 $id = trim($_GET['id'] ?? '');
 if ($id === '') { die('Invalid student ID'); }
 
-$s = $conn->prepare('SELECT first_name, last_name FROM students WHERE id = ?');
-$s->bind_param('s', $id);
-$s->execute();
-$r = $s->get_result()->fetch_assoc();
-$s->close();
+// Step 1 | look up the student so the confirmation screen can name them
+$stmt = $pdo->prepare('SELECT first_name, last_name FROM students WHERE id = ?');
+$stmt->execute([$id]);
+$student = $stmt->fetch();
 
 if (!$student) {
     echo '<p>Student not found.</p>';
@@ -16,16 +18,17 @@ if (!$student) {
     exit;
 }
 
+// Step 2 | delete only after the POST confirmation
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $d = $pdo->prepare('DELETE FROM students WHERE id = ?');
         $d->execute([$id]);
 
         if ($d->rowCount() === 1) {
-            $pdo->commit();
+            $pdo->commit();   // required: autocommit is off in config.php
             echo '<p>Student deleted successfully.</p>';
         } else {
-            $pdo->rollBack();
+            if ($pdo->inTransaction()) { $pdo->rollBack(); }
             echo '<p>Failed to delete student.</p>';
         }
     } catch (PDOException $e) {
@@ -33,17 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         error_log($e->getMessage());
         echo '<p>Failed to delete student.</p>';
     }
+    echo '<p><a href="index.php">Back to list</a></p>';
     $pdo = null;
-}
-
- else {
-    // confirmation screen (same as Part 1)
+} else {
+    // Confirmation screen
     ?>
-
-    <!DOCTYPE html>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="style.css">
-    
     <h2>Confirm Delete</h2>
     <p>Are you sure you want to delete
        <strong><?= htmlspecialchars($student['first_name'] . ' ' . $student['last_name']) ?></strong>?</p>
